@@ -3,6 +3,7 @@ const ASSETS = [
   './',
   './index.html',
   './battle.html',
+  './challange.html',
   './manifest.json'
 ];
 
