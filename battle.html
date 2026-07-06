@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SYSTEM_CORE // BATTLE ARENA v1.1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #02040a;
+            --bg-card: #080c16;
+            --bg-input: #0f1526;
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff0055;
+            --neon-green: #39ff14;
+            --neon-yellow: #ffe600;
+            --neon-purple: #b5179e;
+            --text-main: #f8fafc;
+            --text-muted: #475569;
+            --cyber-grid: linear-gradient(to right, rgba(0, 243, 255, 0.015) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(0, 243, 255, 0.015) 1px, transparent 1px);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-main); background-image: var(--cyber-grid); background-size: 20px 20px;
+            color: var(--text-main); font-family: 'Rajdhani', sans-serif; padding: 12px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .cyber-font { font-family: 'Orbitron', sans-serif; }
+
+        header {
+            width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: rgba(8, 12, 22, 0.9); border: 1px solid rgba(0, 243, 255, 0.15);
+            border-bottom: 3px solid var(--neon-magenta); border-radius: 6px; backdrop-filter: blur(8px); margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.1); gap: 12px; flex-wrap: wrap;
+        }
+
+        header > div { flex: 1; min-width: 0; }
+
+        h1 { font-size: 18px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
+
+        .btn-hud {
+            background: rgba(0, 243, 255, 0.03); color: var(--neon-cyan); border: 1px solid rgba(0, 243, 255, 0.4);
+            padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer;
+            transition: all 0.2s; text-shadow: 0 0 4px var(--neon-cyan); font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; white-space: nowrap;
+        }
+        .btn-hud:hover { 
+            background: rgba(0, 243, 255, 0.15); border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); transform: translateY(-1px);
+        }
+
+        .main-container { width: 100%; max-width: 850px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .arena-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px; }
+        
+        .fighter-card {
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.03); padding: 15px;
+            border-radius: 6px; display: flex; flex-direction: column; align-items: center; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .my-fighter { border-bottom: 3px solid var(--neon-cyan); }
+        .enemy-fighter { border-bottom: 3px solid var(--neon-magenta); }
+
+        .avatar-box {
+            height: 160px; width: 100%; display: flex; align-items: center; justify-content: center;
+            margin: 5px 0; transition: transform 0.4s ease;
+        }
+        .svg-layer { animation: floatMecha 3.5s ease-in-out infinite alternate; }
+        
+        @keyframes floatMecha {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-6px) rotate(1deg); }
+        }
+
+        .hp-container { width: 100%; background: #02040a; border: 1px solid rgba(255,255,255,0.06); height: 12px; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+        .hp-bar { height: 100%; transition: width 0.3s ease; }
+        .my-hp { background: var(--neon-green); width: 100%; box-shadow: 0 0 8px var(--neon-green); }
+        .enemy-hp { background: var(--neon-magenta); width: 100%; box-shadow: 0 0 8px var(--neon-magenta); }
+
+        .quiz-card {
+            background: var(--bg-card); border: 1px solid rgba(0, 243, 255, 0.1); border-radius: 6px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
+        }
+        .question-text { font-size: 16px; font-weight: 600; margin-bottom: 20px; min-height: 50px; color: #fff; line-height: 1.4; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px; }
+        .option-btn {
+            background: var(--bg-input); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main);
+            padding: 12px 15px; border-radius: 4px; font-family: 'Rajdhani', sans-serif; font-size: 14px;
+            font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s;
+        }
+        .option-btn:hover {
+            border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.05); color: #fff;
+        }
+
+        .battle-log {
+            background: #02040a; border: 1px dashed rgba(255,255,255,0.05); padding: 10px;
+            border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--neon-yellow);
+            min-height: 35px; display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+
+        @media (max-width: 550px) {
+            header { flex-direction: column; align-items: flex-start; gap: 14px; padding: 14px; }
+            header .btn-hud { width: 100%; text-align: center; }
+            .arena-grid { grid-template-columns: 1fr; }
+            .avatar-box { height: 140px; }
+            .question-text { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1 class="cyber-font" style="color: var(--neon-magenta);">MATRIX_ARENA // QUIZ_BATTLE</h1>
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Antivirus Combat Protocol v1.1</div>
+        </div>
+        <button class="btn-hud" onclick="backToCore()">◀ BACK_TO_CORE</button>
+    </header>
+
+    <div class="main-container">
+        
+        <div class="arena-grid">
+            <div class="fighter-card my-fighter">
+                <span class="cyber-font" style="font-size: 10px; color: var(--neon-cyan);">[ ALLY_MONSTER ]</span>
+                <h2 id="my-name" style="font-size: 16px; margin-top:3px;">SYAM-PROTO</h2>
+                <div id="my-lv" style="font-size: 12px; color: var(--neon-yellow); font-family: 'Orbitron'; font-weight: bold;">LV. 001</div>
+                
+                <div class="avatar-box" id="my-avatar-wrapper"></div>
+                
+                <div class="hp-container"><div id="my-hp-bar" class="hp-bar my-hp"></div></div>
+                <div style="font-size: 11px; margin-top:4px; font-family:'Orbitron'" id="my-hp-txt">HP: 100/100</div>
+            </div>
+
+            <div class="fighter-card enemy-fighter">
+                <span class="cyber-font" style="font-size: 10px; color: var(--neon-magenta);">[ CORRUPTED_NODE ]</span>
+                <h2 id="enemy-name" style="font-size: 16px; margin-top:3px; color: var(--neon-magenta)">MALWARE_X</h2>
+                <div id="enemy-lv" style="font-size: 12px; color: #ff7700; font-family: 'Orbitron'; font-weight: bold;">LV. ??</div>
+                
+                <div class="avatar-box" id="enemy-avatar-wrapper"></div>
+                
+                <div class="hp-container"><div id="enemy-hp-bar" class="hp-bar enemy-hp"></div></div>
+                <div style="font-size: 11px; margin-top:4px; font-family:'Orbitron'" id="enemy-hp-txt">HP: 100/100</div>
+            </div>
+        </div>
+
+        <div class="battle-log" id="battle-log-node">READY_FOR_COMBAT: Jawab kuis dengan benar untuk melancarkan serangan siber!</div>
+
+        <div class="quiz-card">
+            <div class="question-text" id="question-node">Mengambil database soal pengetahuan umum dari sasis inti...</div>
+            <div class="options-grid" id="options-node"></div>
+            <button class="btn-hud" id="next-btn" style="width: 100%; display: none; border-color: var(--neon-yellow); color: var(--neon-yellow);" onclick="nextTurn()">NEXT_TURN // CARI TARGET BARU</button>
+        </div>
+
+    </div>
+
+    <script>
+        let gameState = JSON.parse(localStorage.getItem('kerjainSyamData')) || {
+            monster: { name: "Syam-Proto", level: 1, exp: 0, typePoints: { belajar: 0, konten: 0, olahraga: 0 }, stage: 1, currentType: "Normal" },
+            todos: [], cage: []
+        };
+
+        let myMaxHp = 100 + (gameState.monster.level * 10);
+        let myCurrentHp = myMaxHp;
+        let enemyMaxHp = 80 + (gameState.monster.level * 8);
+        let enemyCurrentHp = enemyMaxHp;
+        let currentQuestion = null;
+        let combatActive = true;
+
+        const enemyNames = ["Trojan.Malware.v8", "Ransomware_Core", "Spyware_Spectre", "Worm.Exploit.EXE", "Phishing_Leviathan", "Adware_Glitch", "Rootkit_Overlord", "DarkNet_Stalker"];
+        const enemyTypes = ["Scholar", "Creator", "Athlete", "Normal"];
+
+        // DATABASE 150 SOAL KUIS PENGETAHUAN UMUM
+        const quizDatabase = [
+            { q: "Apa ibukota dari negara Indonesia?", a: ["Jakarta", "Bandung", "Surabaya", "IKN Nusantara"], c: 3 },
+            { q: "Planet terdekat dari Matahari dalam sistem tata surya kita adalah...", a: ["Venus", "Bumi", "Merkurius", "Mars"], c: 2 },
+            { q: "Siapakah pencipta lagu kebangsaan Indonesia Raya?", a: ["Sujatman", "W.R. Soepratman", "C. Simanjuntak", "Ismail Marzuki"], c: 1 },
+            { q: "Mata uang resmi yang digunakan di negara Jepang adalah...", a: ["Yuan", "Won", "Yen", "Ringgit"], c: 2 },
+            { q: "Benua terbesar di dunia berdasarkan luas wilayahnya adalah...", a: ["Afrika", "Asia", "Amerika Utara", "Eropa"], c: 1 },
+            { q: "Hewan mamalia terbesar yang hidup di Bumi saat ini adalah...", a: ["Gajah Afrika", "Paus Biru", "Hiu Paus", "Dinosaurus"], c: 1 },
+            { q: "Gas apa yang paling banyak terkandung di dalam atmosfer Bumi?", a: ["Oksigen", "Karbon Dioksida", "Nitrogen", "Hidrogen"], c: 2 },
+            { q: "Candi Borobudur yang terkenal terletak di provinsi mana?", a: ["Jawa Tengah", "Yogyakarta", "Jawa Timur", "Jawa Barat"], c: 0 },
+            { q: "Siapakah ilmuwan yang terkenal dengan teori relativitasnya?", a: ["Isaac Newton", "Albert Einstein", "Nikola Tesla", "Galileo Galilei"], c: 1 },
+            { q: "Negara manakah yang menjuarai Piala Dunia FIFA tahun 2022 di Qatar?", a: ["Prancis", "Brasil", "Argentina", "Jerman"], c: 2 },
+            { q: "Berapakah jumlah provinsi di Indonesia saat ini (pasca pemekaran Papua)?", a: ["34", "38", "37", "40"], c: 1 },
+            { q: "Samudra terluas di dunia adalah...", a: ["Samudra Atlantik", "Samudra Hindia", "Samudra Pasifik", "Samudra Arktik"], c: 2 },
+            { q: "Logam cair yang biasanya digunakan di dalam termometer suhu konvensional adalah...", a: ["Raksa", "Alkohol", "Besi", "Tembaga"], c: 0 },
+            { q: "Lambang unsur kimia untuk air bersih adalah...", a: ["CO2", "H2O", "O2", "NaCl"], c: 1 },
+            { q: "Siapakah presiden pertama Republik Indonesia?", a: ["Moh. Hatta", "Soeharto", "Ir. Soekarno", "B.J. Habibie"], c: 2 },
+            { q: "Alat untuk mengukur gempa bumi dinamakan...", a: ["Barometer", "Seismograf", "Termometer", "Altimeter"], c: 1 },
+            { q: "Benua terkecil di dunia adalah...", a: ["Eropa", "Australia", "Antartika", "Asia"], c: 1 },
+            { q: "Sel darah merah dalam tubuh manusia sering juga disebut sebagai...", a: ["Leukosit", "Trombosit", "Eritrosit", "Plasma"], c: 2 },
+            { q: "Negara manakah yang memiliki garis pantai terpanjang kedua di dunia?", a: ["Kanada", "Indonesia", "Rusia", "Australia"], c: 1 },
+            { q: "Gunung tertinggi di dunia adalah Gunung...", a: ["Kilimanjaro", "Fujiyama", "Everest", "Semeru"], c: 2 },
+            { q: "Sungai terpanjang di dunia adalah Sungai...", a: ["Amazon", "Nil", "Yangtze", "Mississippi"], c: 1 },
+            { q: "Zat hijau pada daun tumbuhan yang berfungsi untuk fotosintesis dinamakan...", a: ["Klorofil", "Stomata", "Floem", "Xilem"], c: 0 },
+            { q: "Berapa jumlah tulang pada tubuh manusia dewasa secara rata-rata?", a: ["206", "300", "150", "250"], c: 0 },
+            { q: "Kota terpadat di dunia saat ini ditempati oleh kota...", a: ["New York", "Shanghai", "Tokyo", "Seoul"], c: 2 },
+            { q: "Siapa penemu benua Amerika yang tercatat dalam sejarah populer?", a: ["Vasco da Gama", "Christopher Columbus", "Ferdinand Magellan", "Marco Polo"], c: 1 },
+            { q: "Patung Merlion merupakan simbol ikonik dari negara...", a: ["Malaysia", "Singapura", "Thailand", "Vietnam"], c: 1 },
+            { q: "Lambang negara Indonesia adalah...", a: ["Burung Garuda", "Harimau", "Pohon Beringin", "Bendera Merah Putih"], c: 0 },
+            { q: "Vitamin apa yang paling banyak terkandung di dalam buah jeruk segar?", a: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"], c: 2 },
+            { q: "Berapa menit total waktu dalam satu jam?", a: ["60 menit", "100 menit", "50 menit", "24 menit"], c: 0 },
+            { q: "Bahan bakar utama untuk pesawat terbang komersial adalah...", a: ["Bensin", "Solar", "Avtur", "Pertamax"], c: 2 },
+            { q: "Suku asli yang mendiami benua Australia adalah Suku...", a: ["Indian", "Aborigin", "Maori", "Dayak"], c: 1 },
+            { q: "Menara Eiffel terletak di kota...", a: ["London", "Berlin", "Roma", "Paris"], c: 3 },
+            { q: "Selat yang memisahkan Pulau Jawa dengan Pulau Sumatra adalah...", a: ["Selat Sunda", "Selat Bali", "Selat Madura", "Selat Malaka"], c: 0 },
+            { q: "Siapa penulis novel legendaris 'Laskar Pelangi'?", a: ["Tere Liye", "Andrea Hirata", "Pramoedya Ananta Toer", "Raditya Dika"], c: 1 },
+            { q: "Hewan apa yang dikenal dapat mengubah warna kulitnya sesuai lingkungan?", a: ["Bunglon", "Komodo", "Cicak", "Tokek"], c: 0 },
+            { q: "Lembaga PBB yang mengurusi kesehatan dunia adalah...", a: ["UNICEF", "UNESCO", "WHO", "IMF"], c: 2 },
+            { q: "Kesenian asli reog berasal dari daerah...", a: ["Ponorogo", "Banyuwangi", "Solo", "Yogyakarta"], c: 0 },
+            { q: "Ibukota negara Malaysia adalah...", a: ["Kuala Lumpur", "Putrajaya", "Johor Bahru", "Penang"], c: 0 },
+            { q: "Mamalia yang dapat terbang dengan sayap aslinya adalah...", a: ["Tupai terbang", "Kelelawar", "Burung Elang", "Burung Hantu"], c: 1 },
+            { q: "Lagu 'Ampar-Ampar Pisang' berasal dari daerah...", a: ["Kalimantan Selatan", "Sulawesi Utara", "Papua", "Jawa Barat"], c: 0 },
+            { q: "Danau terbesar di Indonesia dan Asia Tenggara adalah Danau...", a: ["Singkarak", "Toba", "Poso", "Batur"], c: 1 },
+            { q: "Penemu lampu pijar pertama yang sukses secara komersial adalah...", a: ["Thomas Alva Edison", "Alexander Graham Bell", "Nikola Tesla", "James Watt"], c: 0 },
+            { q: "Negara terkecil di dunia berdasarkan luas wilayahnya adalah...", a: ["Monako", "Vatikan", "San Marino", "Malta"], c: 1 },
+            { q: "Alat musik angklung terbuat dari bahan...", a: ["Kayu", "Bambu", "Besi", "Kuningan"], c: 1 },
+            { q: "Pusat tata surya kita adalah...", a: ["Bumi", "Matahari", "Jupiter", "Lubang Hitam"], c: 1 },
+            { q: "Suhu di mana air membeku menjadi es pada tekanan standar adalah...", a: ["0 derajat Celsius", "100 derajat Celsius", "32 derajat Celsius", "-5 derajat Celsius"], c: 0 },
+            { q: "Lautan yang membatasi Indonesia di sebelah barat dan selatan adalah Samudra...", a: ["Pasifik", "Hindia", "Arktik", "Atlantik"], c: 1 },
+            { q: "Negara yang terkenal dengan kincir angin dan bunga tulipnya adalah...", a: ["Jerman", "Belanda", "Prancis", "Swiss"], c: 1 },
+            { q: "Sistem pemerintahan di mana kekuasaan tertinggi di tangan rakyat disebut...", a: ["Monarki", "Oligarki", "Demokrasi", "Teokrasi"], c: 2 },
+            { q: "Jumlah senar standar pada alat musik gitar akustik adalah...", a: ["4", "5", "6", "12"], c: 2 },
+            { q: "Hewan khas Australia yang menggendong anaknya di dalam kantung bernama...", a: ["Koala", "Kanguru", "Wombat", "Platypus"], c: 1 },
+            { q: "Zat dalam rokok yang menyebabkan efek kecanduan parah adalah...", a: ["Tar", "Nikotin", "Kafein", "Monoksida"], c: 1 },
+            { q: "Sila pertama Pancasila dilambangkan dengan simbol...", a: ["Rantai", "Pohon Beringin", "Bintang", "Kepala Banteng"], c: 2 },
+            { q: "Berapa hari total waktu dalam tahun kabisat?", a: ["365 hari", "366 hari", "364 hari", "360 hari"], c: 1 },
+            { q: "Suku Baduy mendiami wilayah provinsi...", a: ["Jawa Barat", "Banten", "DKI Jakarta", "Jawa Tengah"], c: 1 },
+            { q: "Penyakit malaria ditularkan melalui gigitan nyamuk jenis...", a: ["Aedes Aegypti", "Anopheles", "Culex", "Mansonia"], c: 1 },
+            { q: "Negara Tirai Bambu adalah julukan untuk negara...", a: ["Jepang", "Korea Utara", "Tiongkok/Cina", "Taiwan"], c: 2 },
+            { q: "Benua yang tidak memiliki penghuni tetap karena tertutup es abadi adalah...", a: ["Arktik", "Antartika", "Australia", "Afrika"], c: 1 },
+            { q: "Seni melipat kertas asal Jepang dinamakan...", a: ["Kimono", "Origami", "Ikebana", "Bonsai"], c: 1 },
+            { q: "Kota yang dijuluki sebagai 'Kota Kembang' di Indonesia adalah...", a: ["Bogor", "Bandung", "Malang", "Yogyakarta"], c: 1 },
+            { q: "Alat optik yang digunakan pada kapal selam untuk melihat permukaan air disebut...", a: ["Mikroskop", "Teleskop", "Periskop", "Lup"], c: 2 },
+            { q: "Rumah adat Gadang berasal dari daerah...", a: ["Sumatra Barat", "Sumatra Utara", "Riau", "Jambi"], c: 0 },
+            { q: "Kuda nil menghabiskan sebagian besar waktunya di...", a: ["Darat", "Pohon", "Air", "Gua"], c: 2 },
+            { q: "Bagian mata yang berfungsi mengatur jumlah cahaya yang masuk adalah...", a: ["Retina", "Iris/Pupil", "Kornea", "Lensa"], c: 1 },
+            { q: "Siapakah pencipta karakter fiksi detektif Sherlock Holmes?", a: ["Agatha Christie", "Sir Arthur Conan Doyle", "J.K. Rowling", "Enid Blyton"], c: 1 },
+            { q: "Kanal buatan terkenal yang menghubungkan Laut Tengah dengan Laut Merah adalah...", a: ["Kanal Panama", "Kanal Suez", "Kanal Kiel", "Kanal Korintus"], c: 1 },
+            { q: "Tari Kecak yang sakral berasal dari daerah...", a: ["Bali", "Lombok", "Banyuwangi", "Sumbawa"], c: 0 },
+            { q: "Jenis batuan yang terbentuk dari pembekuan magma gunung berapi adalah Batuan...", a: ["Sedimen", "Metamorf", "Beku", "Kapur"], c: 2 },
+            { q: "Organ tubuh manusia yang berfungsi memompa darah ke seluruh tubuh adalah...", a: ["Paru-paru", "Hati", "Ginjal", "Jantung"], c: 3 },
+            { q: "Pendiri utama Microsoft adalah miliarder bernama...", a: ["Steve Jobs", "Elon Musk", "Bill Gates", "Mark Zuckerberg"], c: 2 },
+            { q: "Seni bela diri asli yang berasal dari wilayah Nusantara adalah...", a: ["Karate", "Pencak Silat", "Taekwondo", "Kungfu"], c: 1 },
+            { q: "Warna sekunder yang dihasilkan dari campuran warna merah dan kuning adalah...", a: ["Hijau", "Jingga/Oranye", "Ungu", "Cokelat"], c: 1 },
+            { q: "Kerajaan Hindu tertua di Indonesia yang tercatat sejarah adalah...", a: ["Majapahit", "Tarumanegara", "Kutai", "Sriwijaya"], c: 2 },
+            { q: "Mata uang negara Thailand adalah...", a: ["Ringgit", "Dong", "Baht", "Riel"], c: 2 },
+            { q: "Planet terbesar di tata surya kita adalah planet...", a: ["Saturnus", "Uranus", "Jupiter", "Neptunus"], c: 2 },
+            { q: "Penemu telepon pertama di dunia adalah...", a: ["Alexander Graham Bell", "Nikola Tesla", "Thomas Edison", "Albert Einstein"], c: 0 },
+            { q: "Benua Eropa dan Asia dibatasi oleh pegunungan alami bernama...", a: ["Pegunungan Alps", "Pegunungan Ural", "Pegunungan Himalaya", "Pegunungan Andes"], c: 1 },
+            { q: "Zat asam yang terdapat di dalam lambung manusia untuk mencerna makanan adalah...", a: ["Asam Sulfat", "Asam Klorida", "Asam Sitrat", "Asam Asetat"], c: 1 },
+            { q: "Kota New York terletak di negara...", a: ["Inggris", "Kanada", "Amerika Serikat", "Australia"], c: 2 },
+            { q: "Peristiwa Proklamasi Kemerdekaan Indonesia dibacakan di jalan...", a: ["Pegangsaan Timur No. 56", "Imam Bonjol No. 1", "Merdeka Barat", "Malioboro"], c: 0 },
+            { q: "Jumlah kartu dalam satu dek standar kartu Remi (tanpa Joker) adalah...", a: ["50", "52", "54", "48"], c: 1 },
+            { q: "Hewan tercepat di darat yang mampu berlari kilat adalah...", a: ["Singa", "Kuda", "Cheetah", "Macan Tutul"], c: 2 },
+            { q: "Ibukota dari negara Australia yang resmi adalah...", a: ["Sydney", "Melbourne", "Canberra", "Brisbane"], c: 2 },
+            { q: "Monumen Nasional (Monas) terletak di pusat kota...", a: ["Bandung", "Jakarta", "Surabaya", "Yogyakarta"], c: 1 },
+            { q: "Batu mulia terkeras di dunia yang sering dijadikan perhiasan mewah adalah...", a: ["Emas", "Perak", "Intan/Berlian", "Rubi"], c: 2 },
+            { q: "Pemimpin tertinggi agama Katolik di dunia berkedudukan di...", a: ["Yerusalem", "Vatikan", "Roma", "London"], c: 1 },
+            { q: "Alat pernapasan utama pada hewan ikan air tawar maupun laut adalah...", a: ["Paru-paru", "Trakea", "Insang", "Kulit"], c: 2 },
+            { q: "Tari Piring merupakan tarian tradisional yang berasal dari daerah...", a: ["Minangkabau", "Aceh", "Riau", "Palembang"], c: 0 },
+            { q: "Negara yang memiliki jumlah penduduk terbanyak di dunia saat ini adalah...", a: ["Cina", "Amerika Serikat", "India", "Indonesia"], c: 2 },
+            { q: "Ilmu yang mempelajari tentang peta dan pembuatan peta bumi dinamakan...", a: ["Geografi", "Kartografi", "Geologi", "Astronomi"], c: 1 },
+            { q: "Senjata tradisional khas suku Sunda adalah...", a: ["Keris", "Kujang", "Rencong", "Mandau"], c: 1 },
+            { q: "Berapakah akar kuadrat matematika dari angka 144?", a: ["11", "12", "14", "16"], c: 1 },
+            { q: "Siapakah bapak kepanduan sedunia (Pramuka)?", a: ["Baden Powell", "Ki Hajar Dewantara", "Soekarno", "Raden Saleh"], c: 0 },
+            { q: "Lapisan pelindung Bumi dari radiasi sinar ultraviolet Matahari adalah...", a: ["Ionosfer", "Troposfer", "Lapisan Ozon", "Mesosfer"], c: 2 },
+            { q: "Rumah adat honai merupakan rumah khas masyarakat...", a: ["Maluku", "Papua", "NTT", "Sulawesi"], c: 1 },
+            { q: "Negara kincir angin adalah julukan populer untuk...", a: ["Belanda", "Inggris", "Swedia", "Denmark"], c: 0 },
+            { q: "Lagu daerah 'Apuse' berasal dari wilayah...", a: ["Papua", "Maluku", "NTT", "Sulawesi Utara"], c: 0 },
+            { q: "Bahan dasar pembuatan kain sutra yang halus berasal dari serat...", a: ["Kapas", "Kepompong Ulat Sutra", "Rambut Domba", "Sintetis"], c: 1 },
+            { q: "Lembaga penegak hukum tertinggi di Indonesia dalam menguji undang-undang adalah...", a: ["Mahkamah Agung", "Mahkamah Konstitusi", "Komisi Yudisial", "DPR"], c: 1 },
+            { q: "Candi Prambanan merupakan candi peninggalan dari agama...", a: ["Buddha", "Hindu", "Islam", "Kristen"], c: 1 },
+            { q: "Penemu sistem cetak huruf bergerak pertama di dunia adalah...", a: ["Johannes Gutenberg", "Galileo", "Leonardo da Vinci", "Isaac Newton"], c: 0 },
+            { q: "Penyakit yang disebabkan karena kekurangan vitamin C dalam jangka panjang adalah...", a: ["Rambut rontok", "Sariawan/Skorbut", "Rabun senja", "Beri-beri"], c: 1 },
+            { q: "Laut terdalam di dunia yang terletak di Samudra Pasifik barat adalah Palung...", a: ["Mariana", "Jawa", "Puerto Riko", "Sunda"], c: 0 },
+            { q: "Ibukota dari negara Korea Selatan yang padat adalah...", a: ["Busan", "Incheon", "Seoul", "Pyongyang"], c: 2 },
+            { q: "Suku Dayak merupakan suku asli yang mendiami pulau...", a: ["Sumatra", "Sulawesi", "Kalimantan", "Papua"], c: 2 },
+            { q: "Hewan mamalia air yang terkenal cerdas dan sering menolong manusia adalah...", a: ["Hiu", "Paus Orca", "Lumba-lumba", "Anjing Laut"], c: 2 },
+            { q: "Negara yang memenangi kejuaraan Piala Dunia sepak bola pertama kali (1930) adalah...", a: ["Uruguay", "Argentina", "Brasil", "Italia"], c: 0 },
+            { q: "Monumen Taj Mahal yang megah dibangun di negara...", a: ["Pakistan", "India", "Iran", "Mesir"], c: 1 },
+            { q: "Jenis kaca pembesar yang digunakan untuk melihat benda mikro disebut...", a: ["Lup", "Mikroskop", "Teleskop", "Kacamata"], c: 1 },
+            { q: "Mata uang negara Filipina adalah...", a: ["Peso", "Baht", "Rupiah", "Dong"], c: 0 },
+            { q: "Planet yang memiliki cincin es paling megah di tata surya kita adalah...", a: ["Jupiter", "Saturnus", "Uranus", "Neptunus"], c: 1 },
+            { q: "Penemu benua Australia dalam sejarah navigasi barat adalah...", a: ["James Cook", "Christopher Columbus", "Vasco da Gama", "Magellan"], c: 0 },
+            { q: "Negara Paman Sam adalah julukan populer untuk negara...", a: ["Inggris", "Kanada", "Amerika Serikat", "Australia"], c: 2 },
+            { q: "Suku asli yang mendiami wilayah hutan kutub es Alaska dan Kanada adalah...", a: ["Indian", "Eskimo/Inuit", "Aborigin", "Maori"], c: 1 },
+            { q: "Kota Paris merupakan ibukota dari negara...", a: ["Jerman", "Prancis", "Italia", "Spanyol"], c: 1 },
+            { q: "Lembaga PBB yang mengurusi warisan kebudayaan dan pendidikan dunia adalah...", a: ["WHO", "UNICEF", "UNESCO", "WTO"], c: 2 },
+            { q: "Penyakit kelainan darah di mana darah sulit membeku jika terluka adalah...", a: ["Anemia", "Leukimia", "Hemofilia", "Thalasemia"], c: 2 },
+            { q: "Lagu daerah 'Rasa Sayange' berasal dari wilayah kepulauan...", a: ["Maluku", "Papua", "NTT", "Bali"], c: 0 },
+            { q: "Kerajaan Islam pertama yang tercatat berdiri di Pulau Jawa adalah Kesultanan...", a: ["Demak", "Banten", "Cirebon", "Mataram"], c: 0 },
+            { q: "Batu mulia berwarna hijau tua bening yang bernilai sangat tinggi dinamakan...", a: ["Rubi", "Safir", "Zamrud", "Topaz"], c: 2 },
+            { q: "Hewan melata komodo merupakan hewan endemik asli dari negara...", a: ["Malaysia", "Indonesia", "Australia", "Filipina"], c: 1 },
+            { q: "Ilmu yang mempelajari tentang kehidupan hewan dan klasifikasinya dinamakan...", a: ["Botani", "Zoologi", "Geologi", "Ekologi"], c: 1 },
+            { q: "Senjata tradisional khas suku Melayu dan Jawa yang berlekuk adalah...", a: ["Kujang", "Keris", "Rencong", "Mandau"], c: 1 }
+        ];
+
+        function generateHighEndSVG(type, customScale = 1.0, isEnemy = false) {
+            let clr = isEnemy ? "var(--neon-magenta)" : "var(--neon-cyan)";
+            let design = "";
+
+            if (type === "Scholar") {
+                design = `
+                    <circle cx="50" cy="50" r="44" stroke="${clr}" stroke-width="1" fill="none" stroke-dasharray="4 6" opacity="0.4"/>
+                    <circle cx="50" cy="50" r="38" stroke="var(--neon-purple)" stroke-width="1.5" fill="none" stroke-dasharray="25 5"/>
+                    <polygon points="50,16 80,50 50,84 20,50" fill="#050914" stroke="${clr}" stroke-width="2.5"/>
+                    <rect x="34" y="46" width="32" height="8" rx="2" fill="#010307" stroke="${clr}" stroke-width="1.5"/>
+                    <line x1="38" y1="50" x2="62" y2="50" stroke="var(--neon-magenta)" stroke-width="2"/>
+                `;
+            } else if (type === "Creator") {
+                clr = isEnemy ? "var(--neon-magenta)" : "var(--neon-yellow)";
+                design = `
+                    <g transform="rotate(45 50 50)"><rect x="22" y="22" width="56" height="56" fill="#04060f" stroke="${clr}" stroke-width="2" rx="6"/></g>
+                    <rect x="26" y="26" width="48" height="48" fill="#080c18" stroke="var(--neon-magenta)" stroke-width="1" rx="4"/>
+                    <circle cx="50" cy="50" r="12" fill="none" stroke="${clr}" stroke-width="1.5" stroke-dasharray="3 3"/>
+                    <circle cx="42" cy="50" r="3" fill="#fff" filter="drop-shadow(0 0 4px ${clr})"/>
+                    <circle cx="58" cy="50" r="3" fill="#fff" filter="drop-shadow(0 0 4px ${clr})"/>
+                    <path d="M32,22 L22,6 M68,22 L78,6" stroke="${clr}" stroke-width="2" stroke-linecap="round"/>
+                `;
+            } else if (type === "Athlete") {
+                clr = "var(--neon-magenta)";
+                design = `
+                    <polygon points="50,12 78,26 88,54 70,82 30,82 12,54 22,26" fill="#0a0307" stroke="${clr}" stroke-width="2.5"/>
+                    <circle cx="50" cy="54" r="16" fill="none" stroke="var(--neon-yellow)" stroke-width="1.5" stroke-dasharray="8 4"/>
+                    <polygon points="32,42 46,47 50,44 54,47 68,42 62,51 38,51" fill="#000" stroke="${clr}" stroke-width="1.5"/>
+                    <line x1="38" y1="46" x2="62" y2="46" stroke="#fff" stroke-width="1.5"/>
+                `;
+            } else if (type === "ULTIMATE FUSION") {
+                clr = isEnemy ? "var(--neon-magenta)" : "var(--neon-purple)";
+                design = `
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--neon-cyan)" stroke-width="1.5" stroke-dasharray="2 4"/>
+                    <circle cx="50" cy="50" r="34" fill="#030208" stroke="${clr}" stroke-width="2.5"/>
+                    <polygon points="50,34 62,50 50,66 38,50" fill="var(--neon-yellow)" filter="drop-shadow(0 0 8px var(--neon-yellow))"/>
+                    <circle cx="50" cy="50" r="6" fill="none" stroke="#fff" stroke-width="1"/>
+                `;
+            } else {
+                design = `
+                    <circle cx="50" cy="50" r="32" fill="none" stroke="${clr}" stroke-width="2.5" stroke-dasharray="24 6"/>
+                    <circle cx="50" cy="50" r="25" fill="#060b14" stroke="rgba(0, 243, 255, 0.2)" stroke-width="1.5"/>
+                    <rect x="32" y="43" width="10" height="6" rx="1.5" fill="${clr}" filter="drop-shadow(0 0 5px ${clr})"/>
+                    <rect x="58" y="43" width="10" height="6" rx="1.5" fill="${clr}" filter="drop-shadow(0 0 5px ${clr})"/>
+                    <line x1="40" y1="58" x2="60" y2="58" stroke="${clr}" stroke-width="2.5" stroke-linecap="round"/>
+                `;
+            }
+
+            return `
+                <svg width="130" height="130" viewBox="0 0 100 100" class="svg-layer" style="transform: scale(${customScale}); filter: drop-shadow(0 0 10px ${clr});">
+                    ${design}
+                </svg>
+            `;
+        }
+
+        function initBattle() {
+            const m = gameState.monster;
+            document.getElementById('my-name').innerText = m.name.toUpperCase();
+            document.getElementById('my-lv').innerText = `LV. ${m.level}`;
+            
+            let currentScale = 1 + (m.level % 20) * 0.02;
+            document.getElementById('my-avatar-wrapper').innerHTML = generateHighEndSVG(m.currentType, currentScale, false);
+
+            let randomName = enemyNames[Math.floor(Math.random() * enemyNames.length)];
+            let randomType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            let enemyLv = m.level + Math.floor(Math.random() * 3) - 1;
+            if (enemyLv < 1) enemyLv = 1;
+
+            document.getElementById('enemy-name').innerText = randomName;
+            document.getElementById('enemy-lv').innerText = `LV. ${enemyLv}`;
+            document.getElementById('enemy-avatar-wrapper').innerHTML = generateHighEndSVG(randomType, 1.0, true);
+
+            myMaxHp = 100 + (m.level * 10);
+            myCurrentHp = myMaxHp;
+            enemyMaxHp = 80 + (enemyLv * 8);
+            enemyCurrentHp = enemyMaxHp;
+
+            combatActive = true;
+            document.getElementById('next-btn').style.display = "none";
+            document.getElementById('options-node').style.display = "grid";
+            document.getElementById('battle-log-node').innerText = "LINK_ESTABLISHED: Database kuis terhubung, serang malware musuh!";
+            
+            updateHpGraphics();
+            loadRandomQuestion();
+        }
+
+        function updateHpGraphics() {
+            let myPct = (myCurrentHp / myMaxHp) * 100;
+            let enemyPct = (enemyCurrentHp / enemyMaxHp) * 100;
+            if(myPct < 0) myPct = 0;
+            if(enemyPct < 0) enemyPct = 0;
+
+            document.getElementById('my-hp-bar').style.width = myPct + "%";
+            document.getElementById('my-hp-txt').innerText = `HP: ${myCurrentHp}/${myMaxHp}`;
+            document.getElementById('enemy-hp-bar').style.width = enemyPct + "%";
+            document.getElementById('enemy-hp-txt').innerText = `HP: ${enemyCurrentHp}/${enemyMaxHp}`;
+        }
+
+        function loadRandomQuestion() {
+            if(!combatActive) return;
+            
+            currentQuestion = quizDatabase[Math.floor(Math.random() * quizDatabase.length)];
+            document.getElementById('question-node').innerText = currentQuestion.q;
+
+            const optionsContainer = document.getElementById('options-node');
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.a.forEach((opt, idx) => {
+                optionsContainer.innerHTML += `
+                    <button class="option-btn" onclick="submitAnswer(${idx})">${['A', 'B', 'C', 'D'][idx]}. ${opt}</button>
+                `;
+            });
+        }
+
+        function submitAnswer(chosenIdx) {
+            if(!combatActive) return;
+
+            if(chosenIdx === currentQuestion.c) {
+                let dmg = 15 + Math.floor(gameState.monster.level * 2);
+                enemyCurrentHp -= dmg;
+                document.getElementById('battle-log-node').innerText = `💥 CRITICAL_STRIKE! Jawaban benar, melukai musuh sebesar -${dmg} HP!`;
+            } else {
+                let enemyDmg = 12 + Math.floor(gameState.monster.level * 1.5);
+                myCurrentHp -= enemyDmg;
+                document.getElementById('battle-log-node').innerText = `⚠️ SYSTEM_BREACH! Jawaban salah. Malware membalas sebesar -${enemyDmg} HP!`;
+            }
+
+            updateHpGraphics();
+            checkBattleResolution();
+
+            if(combatActive) {
+                combatActive = false;
+                setTimeout(() => {
+                    combatActive = true;
+                    loadRandomQuestion();
+                }, 1300);
+            }
+        }
+
+        function checkBattleResolution() {
+            if(enemyCurrentHp <= 0) {
+                combatActive = false;
+                let expReward = 35 + (gameState.monster.level * 3);
+                gameState.monster.exp += expReward;
+
+                if (gameState.monster.exp >= 100) {
+                    gameState.monster.level += 1;
+                    gameState.monster.exp = 0;
+                    alert(`⚡ OVERCLOCK LEVEL UP! Monster naik ke Level ${gameState.monster.level}!`);
+                }
+
+                document.getElementById('battle-log-node').innerText = `🏆 COMBAT_VICTORY: Malware hancur! +${expReward} EXP berhasil diserap.`;
+                endTurnSequence();
+            } 
+            else if(myCurrentHp <= 0) {
+                combatActive = false;
+                document.getElementById('battle-log-node').innerText = `💀 SYSTEM_CRASH: Pertahanan jebol. Monstermu terkapar.`;
+                endTurnSequence();
+            }
+        }
+
+        function endTurnSequence() {
+            document.getElementById('options-node').innerHTML = '';
+            document.getElementById('next-btn').style.display = "block";
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+        }
+
+        function nextTurn() {
+            initBattle();
+        }
+
+        function backToCore() {
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+            window.location.href = 'index.html';
+        }
+
+        initBattle();
+    </script>
+</body>
+</html>

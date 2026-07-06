@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SYSTEM_CORE // CHALLENGE MATRIX v3.9.1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #02040a;
+            --bg-card: #060b16;
+            --bg-input: #0b1120;
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff0055;
+            --neon-green: #39ff14;
+            --neon-yellow: #ffe600;
+            --rarity-common: #64748b;
+            --rarity-rare: #00f3ff;
+            --rarity-epic: #bd00ff;
+            --rarity-legendary: #ffe600;
+            --text-main: #f1f5f9;
+            --text-muted: #475569;
+            --cyber-grid: linear-gradient(to right, rgba(0, 243, 255, 0.01) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(0, 243, 255, 0.01) 1px, transparent 1px);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-main); background-image: var(--cyber-grid); background-size: 25px 25px;
+            color: var(--text-main); font-family: 'Rajdhani', sans-serif; padding: 16px 12px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .cyber-font { font-family: 'Orbitron', sans-serif; }
+
+        /* --- MODERN HUD HEADER --- */
+        header {
+            width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: rgba(6, 11, 22, 0.85); border: 1px solid rgba(0, 243, 255, 0.15);
+            border-bottom: 3px solid var(--neon-yellow); border-radius: 6px; backdrop-filter: blur(10px); margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.05); gap: 12px; flex-wrap: wrap;
+        }
+
+        h1 { font-size: 18px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255, 230, 0, 0.3); }
+
+        .btn-hud {
+            background: rgba(0, 243, 255, 0.03); color: var(--neon-cyan); border: 1px solid rgba(0, 243, 255, 0.4);
+            padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-shadow: 0 0 4px var(--neon-cyan); font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-hud:hover { 
+            background: rgba(0, 243, 255, 0.15); border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); transform: translateY(-1px);
+        }
+
+        .main-container { width: 100%; max-width: 850px; display: flex; flex-direction: column; gap: 15px; }
+        .cyber-card { background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); position: relative; }
+
+        /* --- COMPACT METRICS HUD --- */
+        .hud-metrics-bar {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;
+            background: rgba(2, 4, 10, 0.6); padding: 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.02);
+        }
+        .metric-status-text { font-size: 12px; font-weight: bold; color: #94a3b8; }
+        .metric-value { color: var(--neon-yellow); font-family: 'Orbitron', sans-serif; font-size: 14px; }
+
+        /* --- CONTROL MATRIX (SEARCH & FILTER) --- */
+        .control-matrix {
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;
+            background: var(--bg-input); padding: 12px; border-radius: 4px; border: 1px dashed rgba(0, 243, 255, 0.15);
+        }
+        .search-input {
+            background: #02040a; border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px;
+            color: white; border-radius: 4px; font-size: 13px; font-family: 'Rajdhani', sans-serif; width: 100%;
+            transition: all 0.2s;
+        }
+        .search-input:focus { border-color: var(--neon-cyan); outline: none; box-shadow: 0 0 8px rgba(0,243,255,0.2); }
+        
+        .filter-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .filter-btn {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); color: #94a3b8;
+            padding: 6px 12px; font-size: 11px; font-family: 'Orbitron', sans-serif; font-weight: bold;
+            border-radius: 3px; cursor: pointer; transition: all 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(0, 243, 255, 0.08); border-color: var(--neon-cyan); color: var(--neon-cyan);
+            text-shadow: 0 0 4px var(--neon-cyan);
+        }
+
+        /* --- ULTRA-MODERN CHALLENGE CARD NODES --- */
+        .challenge-item {
+            background: rgba(11, 17, 32, 0.4); border: 1px solid rgba(255,255,255,0.02);
+            padding: 16px; border-radius: 5px; margin-bottom: 12px; display: flex;
+            justify-content: space-between; align-items: center; gap: 16px; position: relative;
+            transition: all 0.2s ease-in-out;
+        }
+        .challenge-item:hover {
+            background: rgba(11, 17, 32, 0.7);
+            border-color: rgba(0, 243, 255, 0.1);
+            transform: translateX(2px);
+        }
+
+        /* Dynamic Borders by Rarity */
+        .rarity-COMMON { border-left: 4px solid var(--rarity-common); }
+        .rarity-RARE { border-left: 4px solid var(--rarity-rare); box-shadow: inset 5px 0 10px rgba(0, 243, 255, 0.02); }
+        .rarity-EPIC { border-left: 4px solid var(--rarity-epic); box-shadow: inset 5px 0 10px rgba(189, 0, 255, 0.02); }
+        .rarity-LEGENDARY { border-left: 4px solid var(--rarity-legendary); box-shadow: inset 5px 0 15px rgba(255, 230, 0, 0.03); }
+
+        .status-success { opacity: 0.4; border-left-color: var(--neon-green) !important; filter: grayscale(40%); }
+        .status-fail { opacity: 0.4; border-left-color: var(--neon-magenta) !important; filter: grayscale(40%); }
+
+        .item-main { flex: 1; min-width: 0; }
+        
+        .badge-rarity {
+            font-size: 8px; font-family: 'Orbitron', sans-serif; font-weight: 900;
+            padding: 2px 6px; border-radius: 3px; display: inline-block; margin-bottom: 6px;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .badge-COMMON { background: rgba(148, 163, 184, 0.12); color: var(--rarity-common); }
+        .badge-RARE { background: rgba(0, 243, 255, 0.12); color: var(--rarity-rare); text-shadow: 0 0 4px var(--rarity-rare); }
+        .badge-EPIC { background: rgba(189, 0, 255, 0.12); color: var(--rarity-epic); text-shadow: 0 0 4px var(--rarity-epic); }
+        .badge-LEGENDARY { background: rgba(255, 230, 0, 0.12); color: var(--rarity-legendary); text-shadow: 0 0 6px var(--rarity-legendary); animation: blinkGlow 1.5s infinite alternate; }
+
+        @keyframes blinkGlow { 0% { opacity: 0.8; box-shadow: 0 0 4px rgba(255,230,0,0.2); } 100% { opacity: 1; box-shadow: 0 0 10px rgba(255,230,0,0.4); } }
+
+        .item-main h3 { font-size: 16px; color: #fff; margin-bottom: 4px; font-weight: 700; letter-spacing: 0.5px; }
+        .specific-target { font-size: 13px; color: var(--neon-cyan); margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        
+        .meta-container { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; font-weight: bold; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 8px; }
+        .meta-reward { color: var(--neon-green); text-shadow: 0 0 2px rgba(57, 255, 20, 0.2); }
+        .meta-date { color: #526173; font-family: 'Orbitron', sans-serif; }
+
+        .action-group { display: flex; gap: 6px; flex-shrink: 0; }
+        .action-group button {
+            background: #02040a; border: 1px solid rgba(255,255,255,0.08);
+            color: #fff; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;
+            transition: all 0.15s ease;
+        }
+        .btn-success-trigger:hover { background: rgba(57, 255, 20, 0.1) !important; border-color: var(--neon-green) !important; color: var(--neon-green) !important; }
+        .btn-fail-trigger:hover { background: rgba(255, 0, 85, 0.1) !important; border-color: var(--neon-magenta) !important; color: var(--neon-magenta) !important; }
+        .btn-repeat-trigger:hover { background: rgba(255, 255, 255, 0.05) !important; border-color: #fff !important; }
+
+        /* --- FIXED RESPONSIVE VIEW FOR MOBILE DEVICES --- */
+        @media (max-width: 550px) {
+            header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 14px; 
+                padding: 14px;
+            }
+            header .btn-hud {
+                width: 100%; 
+                text-align: center;
+            }
+            h1 { font-size: 15px; letter-spacing: 1px; } 
+            .challenge-item { padding: 12px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .action-group { width: 100%; justify-content: flex-end; border-top: 1px dashed rgba(255,255,255,0.04); padding-top: 8px; }
+            .item-main h3 { font-size: 14px; }
+            .hud-metrics-bar { grid-template-columns: 1fr; padding: 8px; font-size: 11px; }
+            .hud-metrics-bar div { text-align: left !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1 class="cyber-font" style="color: var(--neon-yellow);">CHALLENGE_MATRIX // OVERDRIVE</h1>
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Elite High-Risk Node v3.9.1</div>
+        </div>
+        <button class="btn-hud" onclick="backToCore()">◀ BACK_TO_CORE</button>
+    </header>
+
+    <div class="main-container">
+        
+        <!-- HUD METRICS HUB -->
+        <div class="hud-metrics-bar">
+            <div>
+                <span class="metric-status-text">MONSTER_SYNC:</span>
+                <span id="hud-monster-name" class="metric-value">SYAM-PROTO</span>
+            </div>
+            <div style="text-align: right;">
+                <span class="metric-status-text">COMPLETED_MATRIX:</span>
+                <span id="hud-completed-ratio" class="metric-value">0 / 0</span>
+            </div>
+        </div>
+
+        <!-- CONTROL MATRIX LAYER -->
+        <div class="control-matrix">
+            <input type="text" id="matrix-search" class="search-input" placeholder="Cari kode deskripsi atau target tantangan..." oninput="filterAndRender()">
+            <div class="filter-row">
+                <button class="filter-btn active" id="btn-filter-all" onclick="setFilter('all')">ALL_NODES</button>
+                <button class="filter-btn" id="btn-filter-belajar" onclick="setFilter('belajar')">📚 MIND (LEARN)</button>
+                <button class="filter-btn" id="btn-filter-konten" onclick="setFilter('konten')">🎬 VIBE (CREATIVE)</button>
+                <button class="filter-btn" id="btn-filter-olahraga" onclick="setFilter('olahraga')">⚡ CORE (KINETIC)</button>
+            </div>
+        </div>
+
+        <!-- MAIN MATRIX CARD -->
+        <div class="cyber-card" style="border-top: 3px solid var(--neon-yellow)">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:10px;">
+                <h2 class="cyber-font" style="font-size: 13px; color: #fff; letter-spacing: 0.5px;">ACTIVE_ELITE_MISSIONS</h2>
+                <span id="mission-counter" style="font-size: 11px; color: var(--neon-yellow); font-weight: bold; font-family: 'Orbitron', sans-serif;">0 ACTIVE</span>
+            </div>
+
+            <!-- CORE CONTAINER LIST -->
+            <div id="challenge-list"></div>
+            
+            <button class="btn-hud" style="width: 100%; margin-top: 10px; border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="rerollMissions()">🔄 RE-GENERATE CHALLENGE MATRIX</button>
+        </div>
+
+    </div>
+
+    <script>
+        let gameState = JSON.parse(localStorage.getItem('kerjainSyamData')) || {
+            monster: { name: "Syam-Proto", level: 1, exp: 0, typePoints: { belajar: 0, konten: 0, olahraga: 0 }, stage: 1, currentType: "Normal" },
+            todos: [], cage: []
+        };
+
+        let currentCategoryFilter = 'all';
+
+        // DATABASE MISI SPESIFIK & EKSTREM
+        const complexChallengePool = [
+            { name: "Saturasi Otot Dada", target: "Push-up sebanyak 15x dalam 1 Set bersih", type: "olahraga", rarity: "COMMON", expReward: 40, ptReward: 15 },
+            { name: "Kinetik Statis Core", target: "Plank selama 90 detik tanpa menurunkan pinggang", type: "olahraga", rarity: "RARE", expReward: 60, ptReward: 25 },
+            { name: "Pengondisian Batas Bawah", target: "Squat jump sebanyak 25x konstan", type: "olahraga", rarity: "RARE", expReward: 65, ptReward: 25 },
+            { name: "Hiper-Kinetik V3", target: "Lari secepatnya menembus jarak konstan 3 KM", type: "olahraga", rarity: "EPIC", expReward: 85, ptReward: 35 },
+            { name: "Kardio Agresif", target: "Sesi Kickboxing/Shadow boxing intensif selama 15 menit", type: "olahraga", rarity: "EPIC", expReward: 90, ptReward: 40 },
+            { name: "Overdrive Legendaris", target: "Selesaikan total 100x gabungan Push-up & Squat hari ini", type: "olahraga", rarity: "LEGENDARY", expReward: 130, ptReward: 55 },
+
+            { name: "Injeksi Fokus Mikro", target: "Baca buku Filsafat/Sains selama 10 menit nonstop", type: "belajar", rarity: "COMMON", expReward: 40, ptReward: 15 },
+            { name: "Retensi Kosakata Matriks", target: "Hafalkan dan tulis 10 Kosakata Bahasa Inggris tingkat lanjut", type: "belajar", rarity: "RARE", expReward: 60, ptReward: 25 },
+            { name: "Analisis Pasar Mikro", target: "Analisis 2 Chart Trading & tentukan struktur market valid", type: "belajar", rarity: "RARE", expReward: 65, ptReward: 25 },
+            { name: "Siklus Pencerahan Logistik", target: "Simak materi Supply Chain Management & rangkum nilainya", type: "belajar", rarity: "EPIC", expReward: 80, ptReward: 35 },
+            { name: "Kecerdasan Absolut", target: "Selesaikan 1 Bab penuh materi teknis/buku pelajaran utama", type: "belajar", rarity: "LEGENDARY", expReward: 140, ptReward: 60 },
+
+            { name: "Sketsa Konseptual Cepat", target: "Tulis 3 ide/skrip konten viral untuk feed media", type: "konten", rarity: "COMMON", expReward: 45, ptReward: 15 },
+            { name: "Injeksi Konten Mikro", target: "Edit 1 video pendek (Shorts/Reels) dengan transisi bersih", type: "konten", rarity: "RARE", expReward: 70, ptReward: 25 },
+            { name: "Distribusi Sinyal Media", target: "Publish 1 video atau microblog edukasi ke ruang publik", type: "konten", rarity: "EPIC", expReward: 90, ptReward: 40 }
+        ];
+
+        function generateTimestamp(targetDate = new Date()) {
+            return `${String(targetDate.getDate()).padStart(2, '0')}/${String(targetDate.getMonth()+1).padStart(2, '0')} [${String(targetDate.getHours()).padStart(2, '0')}:${String(targetDate.getMinutes()).padStart(2, '0')}]`;
+        }
+
+        function generateNewMissions() {
+            let shuffled = [...complexChallengePool].sort(() => 0.5 - Math.random());
+            let selected = shuffled.slice(0, 4);
+            
+            return selected.map((m, index) => ({
+                id: Date.now() + index,
+                name: m.name,
+                target: m.target,
+                type: m.type,
+                rarity: m.rarity,
+                expReward: m.expReward,
+                ptReward: m.ptReward,
+                status: "active",
+                date: generateTimestamp()
+            }));
+        }
+
+        if (!gameState.challenges || gameState.challenges.length === 0) {
+            gameState.challenges = generateNewMissions();
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+        }
+
+        function rerollMissions() {
+            if(confirm("// ANOMALI: Men-generate ulang matriks akan mereset progress misi saat ini. Eksekusi?")) {
+                gameState.challenges = generateNewMissions();
+                localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+                filterAndRender();
+            }
+        }
+
+        function backToCore() {
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+            window.location.href = 'index.html';
+        }
+
+        function setFilter(category) {
+            currentCategoryFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-filter-${category}`).classList.add('active');
+            filterAndRender();
+        }
+
+        function handleChallenge(id, action) {
+            const mission = gameState.challenges.find(c => c.id === id);
+            if (!mission) return;
+
+            if (action === 'success') {
+                mission.status = 'success';
+                gameState.monster.exp += mission.expReward; 
+                gameState.monster.typePoints[mission.type] += mission.ptReward;
+
+                if (gameState.monster.exp >= 100) {
+                    gameState.monster.level += 1;
+                    gameState.monster.exp = 0;
+                }
+                alert(`// PROTOKOL MISI SUKSES!\n+${mission.expReward} MEGA EXP asupan core.\n+${mission.ptReward} Poin faksi [${mission.type.toUpperCase()}] tersinkronisasi.`);
+            } 
+            else if (action === 'fail') {
+                mission.status = 'fail';
+            } 
+            else if (action === 'repeat') {
+                mission.status = 'active';
+                const besok = new Date();
+                besok.setDate(besok.getDate() + 1);
+                mission.date = generateTimestamp(besok);
+            }
+
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+            filterAndRender();
+        }
+
+        function filterAndRender() {
+            const container = document.getElementById('challenge-list');
+            const searchQuery = document.getElementById('matrix-search').value.toLowerCase();
+            container.innerHTML = '';
+            
+            let activeCount = 0;
+            let successCount = 0;
+
+            gameState.challenges.forEach(m => {
+                if (m.status === 'success') successCount++;
+            });
+            document.getElementById('hud-completed-ratio').innerText = `${successCount} / ${gameState.challenges.length}`;
+            document.getElementById('hud-monster-name').innerText = gameState.monster.name.toUpperCase();
+
+            const filteredMissions = gameState.challenges.filter(mission => {
+                const matchesCategory = currentCategoryFilter === 'all' || mission.type === currentCategoryFilter;
+                const matchesSearch = mission.name.toLowerCase().includes(searchQuery) || mission.target.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            if(filteredMissions.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:30px 0;">[TIDAK ADA REKAMAN MISI YANG COCOK]</div>`;
+                document.getElementById('mission-counter').innerText = `0 ACTIVE`;
+                return;
+            }
+
+            filteredMissions.forEach(mission => {
+                if (mission.status === 'active') activeCount++;
+                let displayDate = mission.date ? mission.date : '--/--';
+                
+                container.innerHTML += `
+                    <div class="challenge-item rarity-${mission.rarity} status-${mission.status}">
+                        <div class="item-main">
+                            <span class="badge-rarity badge-${mission.rarity}">${mission.rarity}</span>
+                            <h3>${mission.name}</h3>
+                            <div class="specific-target">🎯 ${mission.target}</div>
+                            <div class="meta-container">
+                                <span class="meta-reward">⚡ CORE REWARD: +${mission.expReward} EXP // +${mission.ptReward} PTS [${mission.type.toUpperCase()}]</span>
+                                <span class="meta-date">⏱️ MATRIX_LOG: ${displayDate}</span>
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            ${mission.status === 'active' ? `
+                                <button class="btn-success-trigger" onclick="handleChallenge(${mission.id}, 'success')" style="border-color: rgba(57, 255, 20, 0.3); color: var(--neon-green)">✔️</button>
+                                <button class="btn-fail-trigger" onclick="handleChallenge(${mission.id}, 'fail')" style="border-color: rgba(255, 0, 85, 0.3); color: var(--neon-magenta)">❌</button>
+                            ` : ''}
+                            <button class="btn-repeat-trigger" title="Mutasi Jadwal Besok" onclick="handleChallenge(${mission.id}, 'repeat')">🔄</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('mission-counter').innerText = `${activeCount} ACTIVE`;
+        }
+
+        filterAndRender();
+    </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KERJAIN SYAM // DIGITAL MONSTER SYSTEM v3.8</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- HIGH-END CYBERPUNK HUD THEME --- */
+        :root {
+            --bg-main: #02040a;
+            --bg-card: #080c16;
+            --bg-input: #0f1526;
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff0055;
+            --neon-green: #39ff14;
+            --neon-yellow: #ffe600;
+            --neon-purple: #b5179e;
+            --text-main: #f8fafc;
+            --text-muted: #475569;
+            --cyber-grid: linear-gradient(to right, rgba(0, 243, 255, 0.015) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(0, 243, 255, 0.015) 1px, transparent 1px);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: var(--cyber-grid);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .cyber-font { font-family: 'Orbitron', sans-serif; }
+
+        header {
+            width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; background: rgba(8, 12, 22, 0.9); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-bottom: 3px solid var(--neon-cyan); border-radius: 6px; backdrop-filter: blur(8px); margin-bottom: 15px; gap: 10px;
+        }
+
+        header > div { flex: 1; min-width: 0; }
+        h1 { font-size: 18px; font-weight: 900; letter-spacing: 1.5px; color: #fff; text-shadow: 0 0 8px rgba(0, 243, 255, 0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .system-status { font-size: 10px; color: var(--neon-green); text-shadow: 0 0 4px var(--neon-green); font-weight: bold; text-transform: uppercase; }
+
+        .btn-hud {
+            background: rgba(0, 243, 255, 0.02); color: var(--neon-cyan); border: 1px solid var(--neon-cyan);
+            padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer;
+            transition: all 0.2s ease; text-shadow: 0 0 4px var(--neon-cyan); box-shadow: inset 0 0 6px rgba(0, 243, 255, 0.1);
+            font-family: 'Orbitron', sans-serif; white-space: nowrap; flex-shrink: 0;
+        }
+        .btn-hud:hover { background: rgba(0, 243, 255, 0.12); box-shadow: 0 0 12px rgba(0, 243, 255, 0.3); }
+
+        .grid-container { width: 100%; max-width: 900px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 800px) { .grid-container { grid-template-columns: 1.05fr 0.95fr; } }
+
+        .cyber-card { background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+
+        /* --- MECHA ORB CORE VISUALIZER --- */
+        .monster-display {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 260px;
+            background: radial-gradient(circle, rgba(7, 24, 61, 0.3) 0%, rgba(2, 4, 10, 0.9) 90%);
+            border: 1px solid rgba(0, 243, 255, 0.08); border-radius: 6px; margin: 12px 0; overflow: hidden; position: relative;
+        }
+        .monster-wrapper { transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); display: flex; align-items: center; justify-content: center; }
+        .svg-layer { animation: floatMecha 3.5s ease-in-out infinite alternate; }
+
+        @keyframes floatMecha { 0% { transform: translateY(0px) rotate(0deg); } 100% { transform: translateY(-8px) rotate(1deg); } }
+        @keyframes scanFocus { 0% { opacity: 0.3; } 100% { opacity: 1; filter: drop-shadow(0 0 8px var(--neon-magenta)); } }
+
+        /* --- LIVE COUNTDOWN OVERLAY --- */
+        .countdown-overlay {
+            position: absolute; bottom: 15px; background: rgba(2, 4, 10, 0.85);
+            border: 1px solid var(--neon-magenta); padding: 6px 14px; border-radius: 4px;
+            font-family: 'Orbitron', sans-serif; font-size: 18px; color: var(--neon-magenta);
+            text-shadow: 0 0 6px var(--neon-magenta); font-weight: bold; letter-spacing: 1px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+
+        /* --- METRICS & BARS --- */
+        .hud-stat-box { margin-bottom: 12px; }
+        .hud-status-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 4px; }
+        .hud-bar-bg { background: #02040a; height: 10px; border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); }
+        .hud-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-cyan), #0055ff); box-shadow: 0 0 8px var(--neon-cyan); transition: width 0.4s ease; }
+
+        .sub-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+        .stat-node { background: rgba(15, 21, 38, 0.7); border: 1px solid rgba(255,255,255,0.04); padding: 8px 4px; border-radius: 4px; text-align: center; min-width: 0; }
+        .stat-node label { display: block; font-size: 10px; font-weight: bold; color: var(--text-muted); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-node span { font-size: 14px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
+
+        /* --- CONSOLE INTERFACE --- */
+        .terminal-dialog { background: #02040a; border-left: 3px solid var(--neon-magenta); padding: 10px 12px; font-size: 12px; color: #ffa3b1; min-height: 60px; border-radius: 0 4px 4px 0; margin-bottom: 12px; display: flex; align-items: center; line-height: 1.4; }
+        .monster-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* --- TASK LOG MANAGEMENT --- */
+        .todo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; }
+        .todo-container-scroll { max-height: 350px; overflow-y: auto; padding-right: 2px; }
+        
+        .cyber-list-item { background: rgba(15, 21, 38, 0.4); border: 1px solid rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 4px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .state-success { border-left: 3px solid var(--neon-green); }
+        .state-fail { border-left: 3px solid var(--neon-magenta); }
+        .state-pending { border-left: 3px solid var(--text-muted); }
+        .state-focus { border-left: 3px solid var(--neon-yellow); background: rgba(255, 230, 0, 0.03); }
+
+        .item-text-wrapper { flex: 1; min-width: 0; }
+        .item-text-wrapper h4 { font-size: 13px; color: #fff; margin-bottom: 2px; word-break: break-all; white-space: normal; }
+        .item-text-wrapper .meta-container { display: flex; flex-wrap: wrap; gap: 6px; font-size: 9px; font-weight: bold; }
+        .item-text-wrapper .meta-tag { color: var(--text-muted); }
+        .item-text-wrapper .meta-date { color: var(--neon-cyan); opacity: 0.8; }
+        .item-text-wrapper .meta-target { color: var(--neon-yellow); }
+
+        .action-button-group { display: flex; gap: 4px; flex-shrink: 0; }
+        .action-button-group button { background: #02040a; border: 1px solid rgba(255,255,255,0.08); color: #fff; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
+
+        .cyber-form { background: var(--bg-input); border: 1px dashed rgba(0, 243, 255, 0.2); padding: 12px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+        .cyber-form input, .cyber-form select { background: #02040a; border: 1px solid rgba(255,255,255,0.08); padding: 10px; color: white; border-radius: 4px; font-size: 13px; font-family: 'Rajdhani', sans-serif; }
+        
+        .hidden { display: none !important; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 4, 10, 0.94); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .modal-body { background: var(--bg-card); border: 2px solid var(--neon-yellow); padding: 20px; border-radius: 6px; width: 90%; max-width: 400px; }
+
+        @media (max-width: 440px) {
+            body { padding: 8px; } header { padding: 10px; } h1 { font-size: 15px; letter-spacing: 1px; } .btn-hud { padding: 5px 10px; font-size: 10px; }
+            #monster-name { font-size: 20px !important; } #monster-level-badge { font-size: 12px !important; padding: 4px 8px !important; }
+            .stat-node { padding: 6px 2px; } .stat-node label { font-size: 9px; } .stat-node span { font-size: 12px; }
+            .item-text-wrapper h4 { font-size: 12px; } .action-button-group button { padding: 4px 6px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1 class="cyber-font">SYSTEM_CORE//V3</h1>
+            <div class="system-status">● HARMONIZER NET_ACTIVE</div>
+        </div>
+        <button class="btn-hud" onclick="openCage()">📂 GRID_SANGKAR</button>
+    </header>
+
+    <div class="grid-container">
+        
+        <div class="cyber-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="min-width: 0; flex: 1;">
+                    <h2 id="monster-name" class="cyber-font" style="font-size: 22px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Syam-Proto</h2>
+                    <div id="monster-title" style="color: var(--neon-cyan); font-size:11px; font-weight: bold; margin-top:1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">STAGE: BABY // NORMAL_FORM</div>
+                </div>
+                <div id="monster-level-badge" class="cyber-font" style="background: #02040a; padding: 5px 10px; border:1px solid rgba(0,243,255,0.2); font-weight:bold; color: var(--neon-cyan); flex-shrink:0; font-size:14px; border-radius: 3px;">LV. 001</div>
+            </div>
+
+            <div class="monster-display">
+                <div class="monster-wrapper" id="monster-visual-wrapper"></div>
+                
+                <div id="hud-timer-overlay" class="countdown-overlay hidden">
+                    <span style="font-size: 9px; color: var(--neon-yellow); letter-spacing: 2px;">FOCUSING ON TARGET</span>
+                    <span id="countdown-clock">00:00</span>
+                </div>
+
+                <div style="display: flex; gap: 6px; margin-top: 10px; font-size: 10px;">
+                    <span class="tag" id="tag-type" style="background:#02040a; padding:3px 8px; border:1px solid rgba(255,255,255,0.04); border-radius:3px; font-weight: bold;">TIPE: NORMAL</span>
+                    <span class="tag" id="tag-scale" style="background:#02040a; padding:3px 8px; border:1px solid rgba(255,255,255,0.04); border-radius:3px; font-weight: bold;">SKALA: 1.00x</span>
+                </div>
+            </div>
+
+            <div class="hud-stat-box">
+                <div class="hud-status-label">
+                    <span>MATRIKS_SYNAPSE_EXP</span>
+                    <span id="exp-text" style="color: var(--neon-cyan)">0 / 100</span>
+                </div>
+                <div class="hud-bar-bg">
+                    <div class="hud-bar-fill" id="exp-fill"></div>
+                </div>
+            </div>
+
+            <div class="sub-stats-grid">
+                <div class="stat-node" style="border-top: 2px solid var(--neon-cyan)">
+                    <label>📚 LEARNING</label>
+                    <span id="st-study" style="color: var(--neon-cyan)">0</span>
+                </div>
+                <div class="stat-node" style="border-top: 2px solid var(--neon-purple)">
+                    <label>🎬 CREATIVE</label>
+                    <span id="st-content" style="color: var(--neon-purple)">0</span>
+                </div>
+                <div class="stat-node" style="border-top: 2px solid var(--neon-magenta)">
+                    <label>⚡ KINETIC</label>
+                    <span id="st-sport" style="color: var(--neon-magenta)">0</span>
+                </div>
+            </div>
+
+            <div class="terminal-dialog">
+                <p id="monster-speech" style="margin:0;">Sistem diinisialisasi. Beri saya makan data dari tugas-tugas harianmu.</p>
+            </div>
+
+            <div class="monster-actions-grid">
+                <button class="btn-hud" onclick="goToPage('challenge.html')">⚔️ CHALLENGE</button>
+                <button class="btn-hud" style="border-color: var(--neon-magenta); color: var(--neon-magenta); text-shadow: 0 0 4px rgba(255,0,85,0.2);" onclick="goToPage('battle.html')">🔥 BATTLE</button>
+            </div>
+        </div>
+
+        <div class="cyber-card" style="border-top: 3px solid var(--neon-magenta)">
+            <div class="todo-header">
+                <h3 class="cyber-font" style="font-size: 15px; color:#fff;">LOG_OPERASIONAL</h3>
+                <span id="task-counter" style="font-size:11px; color:var(--neon-magenta); font-weight: bold;">0 PENDING</span>
+            </div>
+
+            <div class="todo-container-scroll">
+                <ul id="todo-list" style="list-style: none;"></ul>
+            </div>
+
+            <button class="btn-hud" id="btn-show-form" style="width: 100%; margin-top:12px; border-color:var(--neon-magenta); color:var(--neon-magenta);" onclick="toggleForm()">+ INPUT RENCANA BARU</button>
+
+            <form id="todo-form" class="cyber-form hidden" onsubmit="addTodo(event)">
+                <input type="text" id="task-name" placeholder="Deskripsi tugas..." required>
+                
+                <input type="number" id="task-duration" placeholder="Target waktu (dalam menit)..." min="1" max="180" required>
+                
+                <select id="task-type" required>
+                    <option value="">-- KATEGORI REKAYASA EXP --</option>
+                    <option value="belajar-filsafat">📚 BELAJAR // Filsafat</option>
+                    <option value="belajar-inggris">📚 BELAJAR // Bahasa Inggris</option>
+                    <option value="belajar-scm">📚 BELAJAR // Supply Chain</option>
+                    <option value="belajar-trading">📚 BELAJAR // Trading</option>
+                    <option value="konten">🎬 PRODUKSI // Konten Media</option>
+                    <option value="olahraga-lari">⚡ KINETIK // Lari</option>
+                    <option value="olahraga-workout">⚡ KINETIK // Workout</option>
+                    <option value="olahraga-breakdance">⚡ KINETIK // Breakdance</option>
+                    <option value="olahraga-kickboxing">⚡ KINETIK // Kickboxing</option>
+                    <option value="bekerja">💼 OPERASIONAL // Bekerja (No EXP)</option>
+                </select>
+                <button type="submit" class="btn-hud" style="border-color: var(--neon-green); color: var(--neon-green);">DEPLOY_TO_MATRIX</button>
+            </form>
+        </div>
+
+    </div>
+
+    <div id="cage-modal" class="modal-overlay hidden">
+        <div class="modal-body">
+            <span class="btn-hud" style="float: right; padding: 2px 6px; border-color: var(--neon-magenta); color:var(--neon-magenta);" onclick="closeCage()">X</span>
+            <h3 class="cyber-font" style="margin-top: 0; color: var(--neon-yellow); font-size: 15px;">📂 GRID_SANGKAR VAULT</h3>
+            <div id="cage-list" style="margin: 15px 0; max-height: 180px; overflow-y:auto;"></div>
+            <button id="btn-fusion" onclick="fusionMonsters()" class="btn-hud" style="width: 100%; border-color: var(--neon-yellow); color: var(--neon-yellow);">INISIASI PROSES FUSION</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = JSON.parse(localStorage.getItem('kerjainSyamData')) || {
+            monster: {
+                name: "Syam-Proto", level: 1, exp: 0,
+                typePoints: { belajar: 0, konten: 0, olahraga: 0 },
+                stage: 1, currentType: "Normal"
+            },
+            todos: [], cage: []
+        };
+
+        let activeTimer = null;
+        let runningTodoId = null;
+
+        const quotesPedes = [
+            "Waktu lo habis terbuang lagi buat hal konyol. Mau jadi NPC pecundang selamanya?",
+            "Rencana bertumpuk rapi di log, tapi aksi riil lo nol besar. Realistis aja bro.",
+            "Gue gak bisa berevolusi kalau lo males mikir dan mager gerak gila.",
+            "Fisik lo makin layu, gak heran sasis pertahanan gue ikut-ikutan kritis.",
+            "Cuma segini batas komitmen lo? Sukses gak sebercanda itu, Syam."
+        ];
+
+        function saveGame() {
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+            renderDOM();
+        }
+
+        function goToPage(pageName) {
+            if(activeTimer) { alert("Sistem terkunci! Selesaikan countdown fokus terlebih dahulu."); return; }
+            localStorage.setItem('kerjainSyamData', JSON.stringify(gameState));
+            window.location.href = pageName;
+        }
+
+        function toggleForm() { document.getElementById('todo-form').classList.toggle('hidden'); }
+
+        function generateTimestamp(targetDate = new Date()) {
+            return `${String(targetDate.getDate()).padStart(2, '0')}/${String(targetDate.getMonth()+1).padStart(2, '0')} [${String(targetDate.getHours()).padStart(2, '0')}:${String(targetDate.getMinutes()).padStart(2, '0')}]`;
+        }
+
+        function addTodo(e) {
+            e.preventDefault();
+            gameState.todos.push({
+                id: Date.now(),
+                name: document.getElementById('task-name').value,
+                duration: parseInt(document.getElementById('task-duration').value) || 25,
+                type: document.getElementById('task-type').value,
+                status: 'pending',
+                date: generateTimestamp()
+            });
+            document.getElementById('todo-form').reset();
+            toggleForm();
+            saveGame();
+        }
+
+        /* ==========================================================
+           PROTOKOL BARU: METODE COUNTDOWN & FOKUS MONSTER 
+           ========================================================== */
+        function startFocusMode(id, durationMinutes) {
+            if (activeTimer) clearInterval(activeTimer);
+            
+            runningTodoId = id;
+            gameState.todos.forEach(t => { if(t.id === id) t.status = 'focus'; });
+            
+            let totalSeconds = durationMinutes * 60;
+            const timerOverlay = document.getElementById('hud-timer-overlay');
+            const clockDisplay = document.getElementById('countdown-clock');
+            
+            timerOverlay.classList.remove('hidden');
+            document.getElementById('monster-speech').innerText = `SYNAPSE FOCUSED. Mengeksekusi matrix target selama ${durationMinutes} menit. Jangan berpaling, Syam!`;
+
+            // Mutasi visual monster: Animasi mata menatap tajam ke countdown
+            const svgElement = document.querySelector('.svg-layer');
+            if (svgElement) {
+                svgElement.style.animation = "scanFocus 0.5s ease-in-out infinite alternate";
+            }
+
+            renderDOM();
+
+            activeTimer = setInterval(() => {
+                totalSeconds--;
+                let mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                let secs = String(totalSeconds % 60).padStart(2, '0');
+                clockDisplay.innerText = `${mins}:${secs}`;
+
+                if (totalSeconds <= 0) {
+                    clearInterval(activeTimer);
+                    activeTimer = null;
+                    timerOverlay.classList.add('hidden');
+                    alert("🚨 TARGET WAKTU TERCAPAI! Selesaikan tugas ini di log operasional.");
+                    handleTodoAction(runningTodoId, 'success');
+                }
+            }, 1000);
+        }
+
+        function handleTodoAction(id, action) {
+            const todo = gameState.todos.find(t => t.id === id);
+            if (!todo) return;
+
+            if (action === 'success') {
+                if(runningTodoId === id) stopTimerEngine();
+                todo.status = 'success';
+                giveExp(todo.type);
+            } else if (action === 'fail') {
+                if(runningTodoId === id) stopTimerEngine();
+                todo.status = 'fail';
+                monsterMarah();
+            } else if (action === 'delete') {
+                if(runningTodoId === id) stopTimerEngine();
+                gameState.todos = gameState.todos.filter(t => t.id !== id);
+            } else if (action === 'repeat') {
+                if(runningTodoId === id) stopTimerEngine();
+                todo.status = 'pending';
+                const besok = new Date();
+                besok.setDate(besok.getDate() + 1);
+                todo.date = generateTimestamp(besok);
+            }
+            saveGame();
+        }
+
+        function stopTimerEngine() {
+            if(activeTimer) {
+                clearInterval(activeTimer);
+                activeTimer = null;
+            }
+            runningTodoId = null;
+            document.getElementById('hud-timer-overlay').classList.add('hidden');
+        }
+
+        function giveExp(taskType) {
+            if (taskType === 'bekerja') return;
+            let pType = taskType.includes('belajar') ? 'belajar' : (taskType.includes('konten') ? 'konten' : 'olahraga');
+            
+            gameState.monster.typePoints[pType] += 10;
+            gameState.monster.exp += 25;
+
+            if (gameState.monster.exp >= 100) {
+                gameState.monster.level += 1;
+                gameState.monster.exp = 0;
+                checkEvolution();
+            }
+        }
+
+        function checkEvolution() {
+            let m = gameState.monster;
+            if (m.level >= 100) {
+                alert("// MAXIMUM DATA REACHED. Mengamankan ke Sangkar Vault...");
+                gameState.cage.push({ name: m.name, currentType: m.currentType });
+                gameState.monster = {
+                    name: "Syam-Proto", level: 1, exp: 0,
+                    typePoints: { belajar: 0, konten: 0, olahraga: 0 },
+                    stage: 1, currentType: "Normal"
+                };
+                return;
+            }
+            if (m.level === 20 && m.stage === 1) { m.stage = 2; determineType(m, "Beta"); }
+            else if (m.level === 50 && m.stage === 2) { m.stage = 3; determineType(m, "Omega"); }
+        }
+
+        function determineType(m, suffix) {
+            let pts = m.typePoints;
+            let max = Object.keys(pts).reduce((a, b) => pts[a] > pts[b] ? a : b);
+            
+            if (max === 'belajar') { m.currentType = "Scholar"; m.name = `Syam-Mind-${suffix}`; }
+            else if (max === 'konten') { m.currentType = "Creator"; m.name = `Syam-Vibe-${suffix}`; }
+            else if (max === 'olahraga') { m.currentType = "Athlete"; m.name = `Syam-Core-${suffix}`; }
+            
+            alert(`// MUTASI DATA: Struktur berubah menjadi -> ${m.name}`);
+        }
+
+        function monsterMarah() {
+            document.getElementById('monster-speech').innerText = quotesPedes[Math.floor(Math.random() * quotesPedes.length)];
+        }
+
+        function generateHighEndSVG(type) {
+            let clr = "var(--neon-cyan)";
+            let design = "";
+
+            if (type === "Scholar") {
+                clr = "var(--neon-cyan)";
+                design = `
+                    <circle cx="50" cy="50" r="44" stroke="${clr}" stroke-width="1" fill="none" stroke-dasharray="4 6" opacity="0.4"/>
+                    <circle cx="50" cy="50" r="38" stroke="var(--neon-purple)" stroke-width="1.5" fill="none" stroke-dasharray="25 5"/>
+                    <polygon points="50,16 80,50 50,84 20,50" fill="#050914" stroke="${clr}" stroke-width="2.5"/>
+                    <rect x="34" y="46" width="32" height="8" rx="2" fill="#010307" stroke="${clr}" stroke-width="1.5"/>
+                    <line x1="38" y1="50" x2="62" y2="50" stroke="var(--neon-magenta)" stroke-width="2"/>
+                `;
+            } else if (type === "Creator") {
+                clr = "var(--neon-yellow)";
+                design = `
+                    <g transform="rotate(45 50 50)"><rect x="22" y="22" width="56" height="56" fill="#04060f" stroke="${clr}" stroke-width="2" rx="6"/></g>
+                    <rect x="26" y="26" width="48" height="48" fill="#080c18" stroke="var(--neon-magenta)" stroke-width="1" rx="4"/>
+                    <circle cx="50" cy="50" r="12" fill="none" stroke="${clr}" stroke-width="1.5" stroke-dasharray="3 3"/>
+                    <circle cx="42" cy="50" r="3" fill="#fff" filter="drop-shadow(0 0 4px ${clr})"/>
+                    <circle cx="58" cy="50" r="3" fill="#fff" filter="drop-shadow(0 0 4px ${clr})"/>
+                    <path d="M32,22 L22,6 M68,22 L78,6" stroke="${clr}" stroke-width="2" stroke-linecap="round"/>
+                `;
+            } else if (type === "Athlete") {
+                clr = "var(--neon-magenta)";
+                design = `
+                    <polygon points="50,12 78,26 88,54 70,82 30,82 12,54 22,26" fill="#0a0307" stroke="${clr}" stroke-width="2.5"/>
+                    <circle cx="50" cy="54" r="16" fill="none" stroke="var(--neon-yellow)" stroke-width="1.5" stroke-dasharray="8 4"/>
+                    <polygon points="32,42 46,47 50,44 54,47 68,42 62,51 38,51" fill="#000" stroke="${clr}" stroke-width="1.5"/>
+                    <line x1="38" y1="46" x2="62" y2="46" stroke="#fff" stroke-width="1.5"/>
+                `;
+            } else if (type === "ULTIMATE FUSION") {
+                clr = "var(--neon-purple)";
+                design = `
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--neon-cyan)" stroke-width="1.5" stroke-dasharray="2 4"/>
+                    <circle cx="50" cy="50" r="34" fill="#030208" stroke="${clr}" stroke-width="2.5"/>
+                    <polygon points="50,34 62,50 50,66 38,50" fill="var(--neon-yellow)" filter="drop-shadow(0 0 8px var(--neon-yellow))"/>
+                    <circle cx="50" cy="50" r="6" fill="none" stroke="#fff" stroke-width="1"/>
+                `;
+            } else {
+                design = `
+                    <circle cx="50" cy="50" r="32" fill="none" stroke="${clr}" stroke-width="2.5" stroke-dasharray="24 6"/>
+                    <circle cx="50" cy="50" r="25" fill="#060b14" stroke="rgba(0, 243, 255, 0.2)" stroke-width="1.5"/>
+                    <rect x="32" y="43" width="10" height="6" rx="1.5" fill="var(--neon-cyan)" filter="drop-shadow(0 0 5px var(--neon-cyan))"/>
+                    <rect x="58" y="43" width="10" height="6" rx="1.5" fill="var(--neon-cyan)" filter="drop-shadow(0 0 5px var(--neon-cyan))"/>
+                    <line x1="40" y1="58" x2="60" y2="58" stroke="${clr}" stroke-width="2.5" stroke-linecap="round"/>
+                `;
+            }
+
+            return `<svg width="170" height="170" viewBox="0 0 100 100" class="svg-layer">${design}</svg>`;
+        }
+
+        function renderDOM() {
+            const m = gameState.monster;
+            const wrapper = document.getElementById('monster-visual-wrapper');
+            
+            document.getElementById('monster-name').innerText = m.name;
+            document.getElementById('monster-level-badge').innerText = `LV. ${String(m.level).padStart(3, '0')}`;
+            
+            let stageString = m.stage === 1 ? 'BABY' : (m.stage === 2 ? 'TEEN' : 'ADULT');
+            if(m.currentType === "ULTIMATE FUSION") stageString = "ANOMALI";
+            document.getElementById('monster-title').innerText = `STAGE: ${stageString} // [${m.currentType.toUpperCase()}_FORM]`;
+            document.getElementById('tag-type').innerText = `TIPE: ${m.currentType.toUpperCase()}`;
+            
+            let currentScale = 1 + (m.level % 20) * 0.02;
+            wrapper.style.transform = `scale(${currentScale})`;
+            document.getElementById('tag-scale').innerText = `SKALA: ${currentScale.toFixed(2)}x`;
+
+            wrapper.innerHTML = generateHighEndSVG(m.currentType);
+
+            // Jika sedang dalam mode fokus, pasang paksa animasi scan glow ke SVG-nya
+            if (activeTimer) {
+                const layer = wrapper.querySelector('.svg-layer');
+                if(layer) layer.style.animation = "scanFocus 0.5s ease-in-out infinite alternate";
+            }
+
+            document.getElementById('exp-text').innerText = `${m.exp} / 100`;
+            const fill = document.getElementById('exp-fill');
+            fill.style.width = `${m.exp}%`;
+            
+            if(m.currentType === "Scholar") fill.style.background = "linear-gradient(90deg, var(--neon-cyan), #0284c7)";
+            else if(m.currentType === "Creator") fill.style.background = "linear-gradient(90deg, var(--neon-yellow), #d97706)";
+            else if(m.currentType === "Athlete") fill.style.background = "linear-gradient(90deg, var(--neon-magenta), #991b1b)";
+            else if(m.currentType === "ULTIMATE FUSION") fill.style.background = "linear-gradient(90deg, var(--neon-purple), var(--neon-magenta))";
+            else fill.style.background = "linear-gradient(90deg, var(--neon-cyan), #0055ff)";
+
+            document.getElementById('st-study').innerText = m.typePoints.belajar;
+            document.getElementById('st-content').innerText = m.typePoints.konten;
+            document.getElementById('st-sport').innerText = m.typePoints.olahraga;
+
+            const list = document.getElementById('todo-list');
+            list.innerHTML = '';
+            let pendingCount = 0;
+
+            gameState.todos.forEach(todo => {
+                if (todo.status === 'pending' || todo.status === 'focus') pendingCount++;
+                let displayType = todo.type.toUpperCase().replace('-', ' // ');
+                let displayDate = todo.date ? todo.date : '--/--';
+                let targetMin = todo.duration ? todo.duration : 25;
+                
+                list.innerHTML += `
+                    <li class="cyber-list-item state-${todo.status}">
+                        <div class="item-text-wrapper">
+                            <h4>${todo.name}</h4>
+                            <div class="meta-container">
+                                <span class="meta-tag">[${displayType}]</span>
+                                <span class="meta-date">⏱️ ${displayDate}</span>
+                                <span class="meta-target">🎯 Target: ${targetMin}m</span>
+                            </div>
+                        </div>
+                        <div class="action-button-group">
+                            ${todo.status === 'pending' ? `
+                                <button style="border-color: var(--neon-cyan); color: var(--neon-cyan)" onclick="startFocusMode(${todo.id}, ${targetMin})">DO 🔥</button>
+                                <button class="btn-success-trigger" onclick="handleTodoAction(${todo.id}, 'success')">✔️</button>
+                                <button class="btn-fail-trigger" onclick="handleTodoAction(${todo.id}, 'fail')">❌</button>
+                            ` : ''}
+                            ${todo.status === 'focus' ? `
+                                <button style="border-color: var(--neon-yellow); color: var(--neon-yellow); animation: scanFocus 0.5s infinite alternate;" onclick="handleTodoAction(${todo.id}, 'success')">DONE</button>
+                            ` : ''}
+                            <button class="btn-opt-trigger" onclick="handleTodoAction(${todo.id}, 'repeat')">🔄</button>
+                            <button onclick="handleTodoAction(${todo.id}, 'delete')" style="color: var(--text-muted); border-color: rgba(255,255,255,0.05)">🗑️</button>
+                        </div>
+                    </li>
+                `;
+            });
+            document.getElementById('task-counter').innerText = `${pendingCount} PENDING`;
+        }
+
+        function openCage() { document.getElementById('cage-modal').classList.remove('hidden'); renderCage(); }
+        function closeCage() { document.getElementById('cage-modal').classList.add('hidden'); }
+        
+        function renderCage() {
+            const el = document.getElementById('cage-list');
+            if(!gameState.cage.length) { 
+                el.innerHTML = "<p style='color:var(--text-muted); text-align:center; font-size:13px; padding:10px 0;'>[KOSONG] Belum ada spesimen level 100.</p>"; 
+                return; 
+            }
+            el.innerHTML = gameState.cage.map((m, i) => `
+                <div style='border: 1px solid rgba(255,255,255,0.05); background: #02040a; padding: 8px; margin-bottom: 6px; border-radius:4px; font-size: 12px; display: flex; justify-content: space-between;'>
+                    <span style="color: var(--neon-yellow); font-weight:bold;">[0${i+1}] ${m.name}</span>
+                    <span style="color: var(--text-muted)">${m.currentType}</span>
+                </div>
+            `).join('');
+        }
+
+        function fusionMonsters() {
+            if (gameState.cage.length < 2) { alert("Sistem Error: Gagal, butuh minimal 2 subjek di Sangkar."); return; }
+            gameState.cage.splice(0, 2);
+            gameState.monster = {
+                name: "Syam-Fusion-X", level: 1, exp: 0,
+                typePoints: { belajar: 30, konten: 30, olahraga: 30 },
+                stage: 4, currentType: "ULTIMATE FUSION"
+            };
+            alert("// REKAYASA FUSION SELESAI.");
+            closeCage();
+            saveGame();
+        }
+
+        renderDOM();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker aktif!', reg))
+                    .catch(err => console.log('Service Worker gagal:', err));
+            });
+        }
+    </script>
+</body>
+</html>
